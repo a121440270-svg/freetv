@@ -1,6 +1,6 @@
 <template>
   <article class="video-card">
-    <NuxtLink :to="`/detail/${video.id}`" class="poster-link">
+    <NuxtLink :to="`/watch/${video.id}`" class="poster-link">
       <div class="poster" :style="`background-image: url(${video.poster})`">
         <div class="overlay">
           <span class="badge">{{ video.category }}</span>
