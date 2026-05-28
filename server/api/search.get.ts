@@ -1,6 +1,6 @@
 import { getQuery } from 'h3'
 import { searchVideos } from './data'
-import { searchFFZY } from '../providers/ffzy'
+import { searchAllProviders } from '../providers/provider-manager'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event).q?.toString() ?? ''
@@ -8,12 +8,10 @@ export default defineEventHandler(async (event) => {
   const localResults = searchVideos(query)
 
   const remoteResults = query
-    ? await searchFFZY(query)
+    ? await searchAllProviders(query)
     : []
 
-  const results = [...remoteResults, ...localResults]
-
   return {
-    results,
+    results: [...remoteResults, ...localResults],
   }
 })
