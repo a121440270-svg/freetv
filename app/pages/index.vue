@@ -40,7 +40,7 @@ import { useFreeTVStore } from '../stores/useFreeTVStore'
 import VideoCard from '../components/VideoCard.vue'
 
 const store = useFreeTVStore()
-const { data } = useAsyncData('trending', () => $fetch('/api/search'))
+const { data } = useAsyncData('trending', () => $fetch('/api/trending'))
 const trending = computed(() => data.value?.results || [])
 
 function toggleFavorite(video: any) {

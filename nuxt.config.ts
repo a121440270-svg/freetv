@@ -6,5 +6,17 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: 'cloudflare-module',
+    externals: {
+      inline: [],
+      trace: [],
+      // Completely exclude better-sqlite3 from build
+      outDir: '.output/server',
+    },
+    rollupConfig: {
+      external: ['better-sqlite3', 'fs', 'path', 'util'],
+      output: {
+        external: ['better-sqlite3'],
+      },
+    },
   },
 })

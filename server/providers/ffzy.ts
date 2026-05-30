@@ -7,6 +7,29 @@ import type {
 
 const API_URL = 'https://cj.ffzyapi.com/api.php/provide/vod/'
 
+async function tryFetch(url: string, options: any = {}, retries = 3, timeout = 10000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const controller = new AbortController()
+      const id = setTimeout(() => controller.abort(), timeout)
+      const res = await fetch(url, { ...options, signal: controller.signal })
+      clearTimeout(id)
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        throw new Error(`Fetch failed with status ${res.status} - ${text}`)
+      }
+      return res
+    }
+    catch (err) {
+      console.error(`ffzy tryFetch attempt ${i + 1} failed for ${url}:`, err?.message || err)
+      if (i === retries - 1)
+        throw err
+      // backoff
+      await new Promise((r) => setTimeout(r, 500 * (i + 1)))
+    }
+  }
+}
+
 function parseEpisodes(playUrl: string): EpisodeItem[] {
   if (!playUrl)
     return []
@@ -28,7 +51,7 @@ function parseEpisodes(playUrl: string): EpisodeItem[] {
 export const ffzyProvider: VideoProvider = {
   async search(keyword: string): Promise<VideoItem[]> {
     try {
-      const response = await fetch(`${API_URL}?ac=videolist&wd=${encodeURIComponent(keyword)}`)
+      const response = await tryFetch(`${API_URL}?ac=videolist&wd=${encodeURIComponent(keyword)}`)
       const data = await response.json()
 
       return (data.list || []).map((item: any) => ({
@@ -54,7 +77,7 @@ export const ffzyProvider: VideoProvider = {
     try {
       const sourceId = id.replace('ffzy-', '')
 
-      const response = await fetch(`${API_URL}?ac=detail&ids=${sourceId}`)
+      const response = await tryFetch(`${API_URL}?ac=detail&ids=${sourceId}`)
       const data = await response.json()
 
       const item = data.list?.[0]

@@ -1,7 +1,7 @@
 <template>
   <div class="watch-page" v-if="detail">
     <div class="player-section">
-      <VideoPlayer
+      <PlayerVideo
         :url="currentEpisode?.url || ''"
         :video-id="detail.id"
         :episode-id="currentEpisode?.id"
@@ -63,6 +63,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { usePlayerStore } from '~/stores/usePlayerStore'
+import PlayerVideo from '~/components/player/VideoPlayer.vue'
 
 const route = useRoute()
 const playerStore = usePlayerStore()

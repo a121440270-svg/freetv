@@ -2,11 +2,22 @@
   "name": "freetv",
   "main": "./.output/server/index.mjs",
   "compatibility_date": "2025-05-23",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "binding": "ASSETS",
     "directory": "./.output/public/"
   },
   "observability": {
     "enabled": true
+  },
+  "env": {
+    "production": {
+      "routes": [
+        {
+          "pattern": "*.workers.dev/*",
+          "zone_name": "example.com"
+        }
+      ]
+    }
   }
 }

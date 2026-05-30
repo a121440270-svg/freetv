@@ -101,8 +101,11 @@ function initPlayer(url: string) {
 
   error.value = ''
 
+  // Use local proxy to avoid CORS and unreachable-origin issues
+  const proxyUrl = url.startsWith('http') ? `/api/proxy?url=${encodeURIComponent(url)}` : url
+
   if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = url
+    video.src = proxyUrl
     setupVideoEvents()
     return
   }
@@ -113,7 +116,7 @@ function initPlayer(url: string) {
       lowLatencyMode: true,
     })
 
-    hls.loadSource(url)
+    hls.loadSource(proxyUrl)
     hls.attachMedia(video)
 
     hls.on(Hls.Events.MANIFEST_PARSED, () => {

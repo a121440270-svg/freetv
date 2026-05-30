@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import Hls from 'hls.js'
-const props = defineProps<{ src: string }>()
+const props = defineProps<{ src?: string }>()
 const videoRef = ref<HTMLVideoElement | null>(null)
 let hls: Hls | null = null
 
