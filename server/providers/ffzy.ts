@@ -12,10 +12,30 @@ async function tryFetch(url: string, options: any = {}, retries = 3, timeout = 1
     try {
       const controller = new AbortController()
       const id = setTimeout(() => controller.abort(), timeout)
-      const res = await fetch(url, { ...options, signal: controller.signal })
+
+      const defaultHeaders = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36',
+        Referer: 'https://cj.ffzyapi.com/',
+        Accept: 'application/json, text/javascript, */*; q=0.01',
+      }
+
+      const mergedOptions = {
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...(options && options.headers ? options.headers : {}),
+        },
+        signal: controller.signal,
+      }
+
+      const res = await fetch(url, mergedOptions)
       clearTimeout(id)
       if (!res.ok) {
         const text = await res.text().catch(() => '')
+        // Give extra logging when WAF/403 occurs so it's easier to diagnose
+        if (res.status === 403) {
+          console.error(`ffzy tryFetch 403 response for ${url}:`, text.slice(0, 200))
+        }
         throw new Error(`Fetch failed with status ${res.status} - ${text}`)
       }
       return res

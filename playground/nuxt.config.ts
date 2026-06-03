@@ -1,6 +1,11 @@
 export default defineNuxtConfig({
-  modules: ['my-module'],
+  modules: ['../src/module'],
   devtools: { enabled: true },
-  compatibilityDate: 'latest',
-  myModule: {},
+  compatibilityDate: '2025-05-23',
+  nitro: {
+    preset: 'cloudflare-module',
+    cloudflare: {
+      deployConfig: true
+    }
+  }
 })

@@ -6,6 +6,12 @@
         @keyup.enter="search"
         placeholder="输入影片关键词，按回车搜索"
       />
+
+      <select v-model="selectedProvider" aria-label="选择来源">
+        <option value="">全部来源</option>
+        <option v-for="p in providers" :key="p.key" :value="p.key">{{ p.name }}</option>
+      </select>
+
       <button @click="search">搜索</button>
     </div>
 
@@ -34,17 +40,22 @@ const store = useFreeTVStore()
 const route = useRoute()
 const router = useRouter()
 const query = ref(route.query.q?.toString() ?? '')
+const selectedProvider = ref(route.query.provider?.toString() ?? '')
+const providers = ref<Array<{ key: string; name: string }>>([])
 const results = ref<any[]>([])
 
 async function loadResults(value = query.value) {
   const params = new URLSearchParams()
   if (value) params.set('q', value)
+  if (selectedProvider.value) params.set('provider', selectedProvider.value)
   const response = await $fetch(`/api/search?${params.toString()}`) as any
   results.value = response?.results || []
 }
 
 function search() {
-  router.push({ path: '/search', query: { q: query.value } })
+  const q: any = { q: query.value }
+  if (selectedProvider.value) q.provider = selectedProvider.value
+  router.push({ path: '/search', query: q })
 }
 
 function toggleFavorite(video: any) {
@@ -56,13 +67,25 @@ function toggleFavorite(video: any) {
 }
 
 watch(
-  () => route.query.q,
-  (value: string | string[] | undefined) => {
-    query.value = value?.toString() ?? ''
+  () => [route.query.q, route.query.provider],
+  (vals: any) => {
+    query.value = route.query.q?.toString() ?? ''
+    selectedProvider.value = route.query.provider?.toString() ?? ''
     loadResults(query.value)
   },
   { immediate: true }
 )
+
+// load providers for dropdown
+;(async () => {
+  try {
+    const res = await $fetch('/api/providers') as any
+    providers.value = res?.providers || []
+  }
+  catch (e) {
+    console.error('Failed to load providers', e)
+  }
+})()
 </script>
 
 <style scoped>

@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.5.0",
+    "@vue/shared": "^3.5.35",
     "@vueuse/core": "^10.3.2",
+    "consola": "^3.4.2",
+    "h3": "1.15.11",
     "hls.js": "^1.6.16",
     "nuxt": "^4.4.6",
     "pinia": "^3.0.4",
@@ -26,12 +29,13 @@
     "@cloudflare/workers-types": "^4.20250523.0",
     "@nuxt/devtools": "^3.2.4",
     "@nuxt/eslint-config": "^1.15.2",
+    "better-sqlite3": "^8.7.0",
     "eslint": "^10.3.0",
     "typescript": "~6.0.3",
+    "vite-node": "^6.0.0",
     "vitest": "^4.1.5",
     "vue-tsc": "^3.2.8",
-    "wrangler": "^4.18.0",
-    "better-sqlite3": "^8.7.0"
+    "wrangler": "^4.18.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

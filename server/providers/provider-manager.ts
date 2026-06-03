@@ -1,8 +1,12 @@
 import { providers } from './config'
-import { ffzyProvider } from './ffzy'
+import { createAppleCmsProvider } from './appleCmsProvider'
 
-const providerMap: Record<string, any> = {
-  ffzy: ffzyProvider,
+const providerMap: Record<string, any> = {}
+
+for (const p of providers) {
+  if (p.type === 'apple-cms') {
+    providerMap[p.key] = createAppleCmsProvider(p.api, p.key)
+  }
 }
 
 export async function searchAllProviders(keyword: string) {
@@ -20,6 +24,15 @@ export async function searchAllProviders(keyword: string) {
   )
 
   return results.flat()
+}
+
+export async function searchProvider(key: string, keyword: string) {
+  const adapter = providerMap[key]
+
+  if (!adapter)
+    return []
+
+  return adapter.search(keyword)
 }
 
 export async function getVideoDetail(id: string) {
