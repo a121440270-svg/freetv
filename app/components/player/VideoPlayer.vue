@@ -101,8 +101,20 @@ function initPlayer(url: string) {
 
   error.value = ''
 
-  // Use local proxy to avoid CORS and unreachable-origin issues
-  const proxyUrl = url.startsWith('http') ? `/api/proxy?url=${encodeURIComponent(url)}` : url
+  // Decide whether to use proxy or raw URL based on user preference
+  let proxyUrl = url
+  try {
+    const directEnabled = localStorage.getItem('directPlayEnabled') !== 'false'
+    if (!directEnabled) {
+      proxyUrl = url.startsWith('http') ? `/api/proxy?url=${encodeURIComponent(url)}` : url
+    } else {
+      // direct play enabled: use raw URL (player will fallback to proxy on error)
+      proxyUrl = url
+    }
+  } catch (e) {
+    // If anything goes wrong, fall back to proxy for compatibility
+    proxyUrl = url.startsWith('http') ? `/api/proxy?url=${encodeURIComponent(url)}` : url
+  }
 
   if (video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src = proxyUrl

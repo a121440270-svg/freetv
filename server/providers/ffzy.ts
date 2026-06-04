@@ -105,6 +105,45 @@ export const ffzyProvider: VideoProvider = {
       if (!item)
         return null
 
+      // 优先选择包含媒体扩展的段（vod_play_url 可能由多个段用 $$$ 分隔）
+      let episodes: EpisodeItem[] = []
+      try {
+        const segments = (item.vod_play_url || '').split('$$$')
+        // 选择首个包含媒体扩展的段（m3u8/mp4/flv/ts/mkv），否则使用第一个段
+        const preferred = segments.find(s => /\.(m3u8|mp4|flv|ts|mkv)/i.test(s)) || segments[0] || ''
+        episodes = parseEpisodes(preferred)
+      } catch (e) {
+        episodes = parseEpisodes(item.vod_play_url)
+      }
+
+      // 尝试将分享页或中间页解析为真实的媒体链接（支持多种格式）
+      async function resolveToMedia(possibleUrl: string) {
+        if (!possibleUrl) return possibleUrl
+        const lower = possibleUrl.toLowerCase()
+        // 如果已经包含常见媒体扩展，直接返回
+        if (lower.includes('.m3u8') || lower.includes('.mp4') || lower.includes('.flv') || lower.includes('.ts') || lower.includes('.mkv')) {
+          return possibleUrl
+        }
+
+        try {
+          const res = await tryFetch(possibleUrl, { referer: 'https://cj.ffzyapi.com/' }, 2, 8000)
+          const text = await res.text().catch(() => '')
+          // 优先匹配常见媒体文件扩展
+          const mediaMatch = text.match(/https?:\/\/[^"'\s]+?\.(m3u8|mp4|flv|ts|mkv)(?:\?[^"'\s]*)?/i)
+          if (mediaMatch) return mediaMatch[0]
+          // 若没有找到带扩展的链接，退而求其次匹配任意 http(s) 链接
+          const anyLink = text.match(/https?:\/\/[^"'\s]+/i)
+          if (anyLink) return anyLink[0]
+        }
+        catch (e) {
+          // ignore
+        }
+        return possibleUrl
+      }
+
+      // 并行解析 episodes 中的链接（将非明确媒体链接解析为可播放的媒体链接）
+      episodes = await Promise.all(episodes.map(async (ep) => ({ ...ep, url: await resolveToMedia(ep.url) })))
+
       return {
         id: `ffzy-${item.vod_id}`,
         source: 'ffzy',
@@ -116,7 +155,7 @@ export const ffzyProvider: VideoProvider = {
         tags: [item.vod_area, item.vod_year].filter(Boolean),
         year: item.vod_year,
         area: item.vod_area,
-        episodes: parseEpisodes(item.vod_play_url),
+        episodes,
       }
     }
     catch (error) {

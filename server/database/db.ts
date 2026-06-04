@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS episodes (
   line_name TEXT,
   episode_name TEXT NOT NULL,
   play_url TEXT NOT NULL,
+  episode_index INTEGER,
+  source_type TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -57,6 +59,16 @@ CREATE TABLE IF NOT EXISTS sync_logs (
   status TEXT NOT NULL,
   message TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS play_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  video_id INTEGER,
+  episode_id INTEGER,
+  play_url TEXT NOT NULL,
+  played_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  user_agent TEXT,
+  referrer TEXT
 );
 `)
 

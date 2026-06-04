@@ -19,6 +19,8 @@ export interface EpisodeEntity {
   line_name?: string
   episode_name: string
   play_url: string
+  episode_index?: number
+  source_type?: string // raw | proxy | resolved
   created_at?: string
 }
 
